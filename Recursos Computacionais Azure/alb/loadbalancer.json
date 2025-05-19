@@ -1,0 +1,280 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "String"
+        },
+        "location": {
+            "type": "String"
+        },
+        "sku": {
+            "type": "String"
+        },
+        "tier": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2023-02-01",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "Microsoft.Network/publicIPAddresses/alb-ip"
+            ],
+            "tags": {
+                "ENV": "DESENVOLVIMENTO"
+            },
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('tier')]"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "alb-front",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/publicIPAddresses/alb-ip"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "http-servers"
+                    }
+                ],
+                "probes": [
+                    {
+                        "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/loadBalancers/alb-01/probes/healthcheckhttp",
+                        "name": "healthcheckhttp",
+                        "properties": {
+                            "protocol": "TCP",
+                            "port": 80,
+                            "requestPath": null,
+                            "intervalInSeconds": 15,
+                            "numberOfProbes": 1
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "http-servers",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/loadBalancers/alb-01/frontendIPConfigurations/alb-front"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "TCP",
+                            "loadDistribution": "Default",
+                            "probe": {
+                                "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/loadBalancers/alb-01/probes/healthcheckhttp"
+                            },
+                            "disableOutboundSnat": true,
+                            "enableTcpReset": false,
+                            "backendAddressPools": [
+                                {
+                                    "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/loadBalancers/alb-01/backendAddressPools/http-servers"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2022-05-01",
+            "name": "alb-ip",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {
+                "ENV": "DESENVOLVIMENTO"
+            },
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('tier')]"
+            },
+            "zones": [
+                "2",
+                "1",
+                "3"
+            ],
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "NicUpdate-9d25674d-ede7-453c-94b8-7259768ad540-20250517105847",
+            "dependsOn": [
+                "Microsoft.Network/loadBalancers/alb-01"
+            ],
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {},
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2022-11-01",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "name": "vm01315_z1",
+                            "location": "eastus",
+                            "properties": {
+                                "provisioningState": "Succeeded",
+                                "resourceGuid": "8be95a08-e0ca-4e97-b0f3-2bdf9abc6d2c",
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/networkInterfaces/vm01315_z1/ipConfigurations/ipconfig1",
+                                        "etag": "W/\"ea287263-a57c-456c-b2b5-6563ed751d2f\"",
+                                        "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
+                                        "properties": {
+                                            "provisioningState": "Succeeded",
+                                            "privateIPAddress": "10.40.0.4",
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "subnet": {
+                                                "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/virtualNetworks/infnet-vnet1/subnets/private01"
+                                            },
+                                            "primary": true,
+                                            "privateIPAddressVersion": "IPv4",
+                                            "loadBalancerBackendAddressPools": [
+                                                {
+                                                    "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourcegroups/RG_DEV/providers/Microsoft.Network/loadBalancers/alb-01/backendAddressPools/http-servers"
+                                                }
+                                            ],
+                                            "loadBalancerInboundNatRules": []
+                                        }
+                                    }
+                                ],
+                                "dnsSettings": {
+                                    "dnsServers": [],
+                                    "appliedDnsServers": [],
+                                    "internalDomainNameSuffix": "qxdnvgz1u4buznz5su1k02eywg.bx.internal.cloudapp.net"
+                                },
+                                "macAddress": "7C-1E-52-01-ED-F2",
+                                "enableAcceleratedNetworking": false,
+                                "vnetEncryptionSupported": false,
+                                "enableIPForwarding": false,
+                                "disableTcpStateTracking": false,
+                                "primary": true,
+                                "virtualMachine": {
+                                    "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Compute/virtualMachines/vm01"
+                                },
+                                "hostedWorkloads": [],
+                                "tapConfigurations": [],
+                                "nicType": "Standard",
+                                "allowPort25Out": false,
+                                "auxiliaryMode": "None",
+                                "auxiliarySku": "None"
+                            },
+                            "tags": {}
+                        }
+                    ],
+                    "outputs": {}
+                }
+            },
+            "resourceGroup": "RG_DEV"
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "NicUpdate-467fe213-d25e-4ffc-a0ee-14ddb82d765c-20250517105847",
+            "dependsOn": [
+                "Microsoft.Network/loadBalancers/alb-01"
+            ],
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {},
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2022-11-01",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "name": "vm02994",
+                            "location": "eastus",
+                            "properties": {
+                                "provisioningState": "Succeeded",
+                                "resourceGuid": "d927343f-8c94-4b1a-a4b8-14d9aafe6506",
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/networkInterfaces/vm02994/ipConfigurations/ipconfig1",
+                                        "etag": "W/\"ec9edade-78d9-4bd4-8790-6d40345a28a1\"",
+                                        "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
+                                        "properties": {
+                                            "provisioningState": "Succeeded",
+                                            "privateIPAddress": "10.40.1.4",
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "subnet": {
+                                                "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Network/virtualNetworks/infnet-vnet1/subnets/private02"
+                                            },
+                                            "primary": true,
+                                            "privateIPAddressVersion": "IPv4",
+                                            "loadBalancerBackendAddressPools": [
+                                                {
+                                                    "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourcegroups/RG_DEV/providers/Microsoft.Network/loadBalancers/alb-01/backendAddressPools/http-servers"
+                                                }
+                                            ],
+                                            "loadBalancerInboundNatRules": []
+                                        }
+                                    }
+                                ],
+                                "dnsSettings": {
+                                    "dnsServers": [],
+                                    "appliedDnsServers": [],
+                                    "internalDomainNameSuffix": "qxdnvgz1u4buznz5su1k02eywg.bx.internal.cloudapp.net"
+                                },
+                                "macAddress": "7C-1E-52-FD-8A-8B",
+                                "enableAcceleratedNetworking": false,
+                                "vnetEncryptionSupported": false,
+                                "enableIPForwarding": false,
+                                "disableTcpStateTracking": false,
+                                "primary": true,
+                                "virtualMachine": {
+                                    "id": "/subscriptions/468bea5f-9102-4bab-ae4a-c5bf5b7c4c63/resourceGroups/RG_DEV/providers/Microsoft.Compute/virtualMachines/vm02"
+                                },
+                                "hostedWorkloads": [],
+                                "tapConfigurations": [],
+                                "nicType": "Standard",
+                                "allowPort25Out": false,
+                                "auxiliaryMode": "None",
+                                "auxiliarySku": "None"
+                            },
+                            "tags": {
+                                "ENV": "DESENVOLVIMENTO"
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            },
+            "resourceGroup": "RG_DEV"
+        }
+    ]
+}
